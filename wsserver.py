@@ -59,11 +59,28 @@ async def processMsg(ws:websockets.server.WebSocketServerProtocol, msg:str, p:Pl
   await asyncio.sleep(0)
 
 
+eventLoop = None
+
 async def _start(port:int):
+  global eventLoop
+  eventLoop = asyncio.get_event_loop()
+
   async with await websockets.server.serve(newConnection, "0.0.0.0", port):
     print(f"WS Server listening on port {port}")
     await asyncio.Future()  # run forever
 
 
-def start(port:int):  
-  asyncio.run(_start(port))
+def start(port:int, stopPort:int):
+  try:
+    asyncio.run(_start(port))
+
+  except KeyboardInterrupt:
+    import urllib.request
+    eventLoop.close()
+    app.stopRequested = True
+    try:
+      urllib.request.urlopen(f"http://localhost:{stopPort}/stop")
+    except:
+      pass
+    print()
+    print("Exiting due to KeyboardInterrupt")

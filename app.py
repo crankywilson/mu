@@ -3,6 +3,7 @@ from cryptography.fernet import Fernet
 from player import Player
 from typing import Dict
 
+stopRequested = False
 fernet = Fernet(Fernet.generate_key())
 games = {1: Game(1)}
 players : Dict[int, Player] = {}
