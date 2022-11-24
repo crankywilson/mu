@@ -2,10 +2,7 @@
 import websockets.server
 import asyncio
 import app
-from   typing import TYPE_CHECKING
-
-
-#if TYPE_CHECKING:
+from   typing import Optional
 from player import Player
 from game import Game
 
@@ -59,7 +56,7 @@ async def processMsg(ws:websockets.server.WebSocketServerProtocol, msg:str, p:Pl
   await asyncio.sleep(0)
 
 
-eventLoop = None
+eventLoop : Optional[asyncio.AbstractEventLoop] = None
 
 async def _start(port:int):
   global eventLoop
@@ -76,7 +73,8 @@ def start(port:int, stopPort:int):
 
   except KeyboardInterrupt:
     import urllib.request
-    eventLoop.close()
+    if eventLoop is not None:
+      eventLoop.close()
     app.stopRequested = True
     try:
       urllib.request.urlopen(f"http://localhost:{stopPort}/stop")
