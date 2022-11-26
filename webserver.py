@@ -1,8 +1,44 @@
 import threading
 import http.server
 import app
+from typing import Union, Optional, Dict
+from http.cookies import SimpleCookie
 
-specialPaths = {}
+def sendResponse(handler : http.server.SimpleHTTPRequestHandler, resp:Union[str,bytes], cookie:Optional[SimpleCookie]=None):
+  handler.send_response(200)
+  handler.send_header("Content-type", "text/html")
+  if cookie is not None:
+    for morsel in cookie.values():
+      handler.send_header("Set-Cookie", morsel.OutputString())
+  handler.end_headers()
+
+  if isinstance(resp, str):
+    resp = resp.encode()
+  handler.wfile.write(resp)
+
+
+def redirect(handler : http.server.SimpleHTTPRequestHandler, newPath:str, cookie:Optional[SimpleCookie]=None):
+  handler.send_response(302)
+  handler.send_header('Location', newPath)
+  if cookie is not None:
+    for morsel in cookie.values():
+      handler.send_header("Set-Cookie", morsel.OutputString())
+  handler.end_headers()
+
+
+def handleRoot(handler : http.server.SimpleHTTPRequestHandler):
+  cookie = SimpleCookie(handler.headers.get('Cookie'))
+  if "tok" in cookie:
+    tok=cookie["tok"].value
+    p, g = app.playerAndGameForToken(tok)
+    if p is not None and g.started:
+      return redirect(handler, '/play')
+  
+  return redirect(handler, '/setup')
+
+specialPaths = {
+  "/":      handleRoot
+}
 
 class _handler(http.server.SimpleHTTPRequestHandler):
   def __init__(self, *args, **kwargs):
@@ -12,15 +48,18 @@ class _handler(http.server.SimpleHTTPRequestHandler):
       pass
 
   def do_GET(self):
-    if self.path in specialPaths:
-      specialPaths[self.path]()
+    path = self.path.split('?')[0]
+    if path in specialPaths:
+      specialPaths[path](self)
     else:
       http.server.SimpleHTTPRequestHandler.do_GET(self)
 
   def log_message(self, format, *args):
         return
 
+
 port = 0
+
 
 def _startWeb(portParam : int):
   global port
@@ -29,6 +68,7 @@ def _startWeb(portParam : int):
   print(f"HTTP Server listening on port {port}")
   while not app.stopRequested:
     httpd.handle_request()
+
 
 def start(port : int):
   try:

@@ -1,4 +1,4 @@
-from game import Game
+from game import Game, UNASSIGNED
 from cryptography.fernet import Fernet
 from player import Player
 from typing import Dict
@@ -16,21 +16,28 @@ def playerAndGameForToken(tok:str):
     pid = int(l[1])
     g = games[gid] if gid in games else None
     p = players[pid] if pid in players else None
-    return p, g
+    if g is not None and p is not None and p in g.players:
+      return p, g
+    return None, UNASSIGNED
   except:
-    return None, None
+    return None, UNASSIGNED
 
 def addPlayer():
-  g = games[next(iter(games))]
-  if g.started or len(g.players) >= 4:
-    return None, None
   global playerCounter
   playerCounter += 1
   p = Player()
   p.id = playerCounter
   players[p.id] = p
-  return p, g
+  return p
 
+def getPlayer(id:int):
+  global playerCounter
+  if id in players:
+    return players[id]
+  if id >= playerCounter:
+    playerCounter = id - 1
+  return addPlayer()
+  
 def getToken(g:Game,p:Player):
   l = f"{g.id} {p.id}"
   return fernet.encrypt(l.encode())

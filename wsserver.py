@@ -4,26 +4,16 @@ import asyncio
 import app
 from   typing import Optional
 from player import Player
-from game import Game
+from game import Game, UNASSIGNED
 
 
 
 async def newConnection(ws:websockets.server.WebSocketServerProtocol, path:str):
   print(f"New ws connection from {ws.host}: {path}")
-  tok = path.split('=')[1] if path.find('=') > 0 else '?'
-  p, g = app.playerAndGameForToken(tok)
-  
-  if p is None or g is None:
-    p, g = app.addPlayer()
+  p, g = getPlayerAndGame(ws, path)
 
-  if p is None or g is None:
-    print(f"bad connection token processed: {tok}")
-    return
+  await processMsg(ws, '{"msg":"Connected"}', p, g)
 
-  p.ws = ws
-
-  await processMsg(ws, '{"msg":"Connected"}', p, g) 
-  
   async for msg in ws:
     if type(msg) is str:
       await messageReceived(ws, msg, p, g)
@@ -31,7 +21,7 @@ async def newConnection(ws:websockets.server.WebSocketServerProtocol, path:str):
   p.ws = None
 
   await connectionClosed(ws, p, g)
-
+ 
 
 async def messageReceived(ws:websockets.server.WebSocketServerProtocol, msg:str, p:Player, g:Game):
   await processMsg(ws, msg, p, g)
@@ -39,6 +29,28 @@ async def messageReceived(ws:websockets.server.WebSocketServerProtocol, msg:str,
 
 async def connectionClosed(ws:websockets.server.WebSocketServerProtocol, p:Player, g:Game):
   await processMsg(ws, '{"msg":"Disconnected"}', p, g) 
+
+
+def getPlayerAndGame(ws:websockets.server.WebSocketServerProtocol, path:str):
+  p = None
+  g = UNASSIGNED
+  if path.find("?z="):
+    try:
+      p = app.getPlayer(int(path.split('=')[1]))
+    except:
+      pass
+
+  if p is None and path.find("?tok="):
+    try:
+      p, g = app.playerAndGameForToken(path.split('=')[1])
+    except:
+      pass
+
+  if p is None:
+    p = app.addPlayer()
+
+  p.ws = ws
+  return p, g
 
 
 async def processMsg(ws:websockets.server.WebSocketServerProtocol, msg:str, p:Player, g:Game):

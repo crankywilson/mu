@@ -76,6 +76,5 @@ class Game:
       if r.ws is not None:
         create_task(r.ws.send(msg))
 
+UNASSIGNED = Game(-1)
 
-
-      
