@@ -9,7 +9,13 @@ from game import Game, UNASSIGNED
 
 
 async def newConnection(ws:websockets.server.WebSocketServerProtocol, path:str):
-  print(f"New ws connection from {ws.host}: {path}")
+  remote = str(ws.remote_address)
+  try:
+    remote = ws.request_headers['X-Remote-IP']
+  except:
+    pass
+
+  print(f"New ws connection from {remote}: {path}")
   p, g = getPlayerAndGame(ws, path)
 
   await processMsg(ws, '{"msg":"Connected"}', p, g)
@@ -20,14 +26,15 @@ async def newConnection(ws:websockets.server.WebSocketServerProtocol, path:str):
 
   p.ws = None
 
-  await connectionClosed(ws, p, g)
+  await connectionClosed(ws, p, g, remote)
  
 
 async def messageReceived(ws:websockets.server.WebSocketServerProtocol, msg:str, p:Player, g:Game):
   await processMsg(ws, msg, p, g)
 
 
-async def connectionClosed(ws:websockets.server.WebSocketServerProtocol, p:Player, g:Game):
+async def connectionClosed(ws:websockets.server.WebSocketServerProtocol, p:Player, g:Game, remote:str):
+  print(f"Connection closed from {remote}")
   await processMsg(ws, '{"msg":"Disconnected"}', p, g) 
 
 
