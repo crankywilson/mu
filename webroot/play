@@ -1,2 +1,67 @@
-play
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>MULE</title>
+<meta charset="utf-8">
+<style>
+ body {
+font-family: Verdana, sans-serif; text-align: center; font-size: 2vh; font-weight: bolder; color: #5f4c28;
+}
+ div {
+position: fixed;
+}
+</style>
+</head>
+
+<body>
+
+<div id="boardview" 
+ style="top: 0;left: 0; width: 100%; height: 100%;"></div>
+
+<div id="p1" 
+ style="top: 1%;left: 5%; width: 15%; height: 8%; background-color: rgba(255,0,0,.2);">
+ P1<br>
+ (₿) 1000<br>
+</div>
+
+<div id="p2" 
+ style="top: 1%;left: 30%; width: 15%; height: 8%; background-color: rgba(255,255,0,.2);">
+ P2<br>
+ (₿) 1000
+</div>
+
+<div id="p3" 
+ style="top: 1%;left: 55%; width: 15%; height: 8%; background-color: rgba(0,255,0,.2);">
+ P3<br>
+ (₿) 1000
+</div>
+
+<div id="p4" 
+ style="top: 1%;left: 80%; width: 15%; height: 8%; background-color: rgba(0,0,255,.2);">
+ P4<br>
+ (₿) 1000
+</div>
+
+<div id="msg"
+ style="top: 9.5%; left: 0px; width: 100%;">
+ Setting up...
+</div>
+
+<script src="three/three.min.js"></script>
+<script src="three/gltfLoader.js"></script>
+<script src="three/orbitControls.js"></script>
+<script src="three/reflector.js"></script>
+<script src="three/refractor.js"></script>
+<script src="three/water2.js"></script>
+<script src="three/fbxLoader.js"></script>
+<script src="three/fflate.min.js"></script>
+<script src="js/setup.js"></script>
+<script src="js/render.js"></script>
+
+<script>
+setup();
+</script>
+
+</body>
+</html>
 
