@@ -12,7 +12,7 @@ class Game:
   def __init__(self, id : int):
     self.id = id
     self.started = False
-    self.players = []
+    self.players : List[Player] = []
     self.store = Player()
     self.state = ''
     self.stateParams = []
