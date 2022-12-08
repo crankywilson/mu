@@ -3,7 +3,9 @@ import websockets.server
 
 class Player:
   def __init__(self):
-    self.id = 0
+    self.id = 0    # global ID across all games
+    self.plnum = 0 # number 1-4 communicated to browser once game established 
+    self.ipsrc = 'Unknown'
     self.ws : Optional[websockets.server.WebSocketServerProtocol] = None
     self.name : Optional[str] = None    # once this name changes, player cannot be re-assigned
     self.species = 0

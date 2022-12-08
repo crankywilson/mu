@@ -17,7 +17,8 @@ async def newConnection(ws:websockets.server.WebSocketServerProtocol, path:str):
 
   print(f"New ws connection from {remote}: {path}")
   p, g = getPlayerAndGame(ws, path)
-
+  p.ipsrc = remote
+  
   await processMsg(ws, '{"msg":"Connected"}', p, g)
 
   async for msg in ws:

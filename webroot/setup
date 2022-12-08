@@ -1,2 +1,137 @@
-setup
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>MULE</title>
+<meta charset="utf-8">
+<style>
+ body {
+font-family: Verdana, sans-serif; font-size: 2vh; font-weight: bolder; 
+color: #5f4c28; background-color: burlywood;
+}
+img {
+  vertical-align: middle;
+}
+ input, button {
+font-family: Verdana, sans-serif; font-size: 2vh; font-weight: bolder; 
+}
+ td {
+text-align: center;
+}
+</style>
+</head>
+
+<body>
+<div>MULE</div>
+<div id="gameowner" style="display: none;">You are the game owner. <button onclick="start()">START</button></div>
+<br>
+<div>Your Name: <input type="text" id="name"></div>
+<P>
+<div id="avail">
+Available characters, click to change yours:
+<img id="red" src="img/red.png">
+<img id="yellow" src="img/yellow.png">
+<img id="green" src="img/green.png">
+<img id="blue" src="img/blue.png">
+</div>
+<P>
+<table width="80%">
+    <tr>
+        <td id="p1" width="25%"><span id="n1">Player 1</span>
+        <BR><span id="i1">123.45.67.89</span>
+        <BR><img id="c1" src="img/red.png">
+        <BR><button id="k1">Kick</button>
+        <BR><button id="s1">Switch</button>
+        </td>
+
+        <td id="p2" width="25%"><span id="n1">Player 2</span>
+        <BR><span id="i1">123.45.67.89</span>
+        <BR><img id="c1" src="img/yellow.png">
+        <BR><button id="k1">Kick</button>
+        <BR><button id="s1">Switch</button>
+        </td>
+
+        <td id="p3" width="25%"><span id="n1">Player 3</span>
+        <BR><span id="i1">123.45.67.89</span>
+        <BR><img id="c1" src="img/green.png">
+        <BR><button id="k1">Kick</button>
+        <BR><button id="s1">Switch</button>
+        </td>
+
+        <td id="p4" width="25%"><span id="n1">Player 4</span>
+        <BR><span id="i1">123.45.67.89</span>
+        <BR><img id="c1" src="img/blue.png">
+        <BR><button id="k1">Kick</button>
+        <BR><button id="s1">Switch</button>
+        </td>
+
+    <tr>
+</table>
+
+<script>
+function e(id)
+{
+    return document.getElementById(id);
+}
+
+function hmUpdateName(m) 
+{
+    document.getElementById("n" + m.token).innerHTML = "<B>" + m.name + "</B>";
+}
+
+
+pendingMessages = []  // queue up newer messages
+function sockMessage(event)
+{
+  //console.log('Got: ' + event.data)
+
+  // don't process new message until all older ones have had processing completed
+  pendingMessages.push(event.data);
+  if (pendingMessages.length > 1)
+    return;
+
+  while (pendingMessages.length > 0)
+  {
+      let m = pendingMessages[0];
+      let o = JSON.parse(m);
+      fname = ('hm' + o.type);
+      if (fname in window && typeof(window[fname]) == "function")
+        window[fname](o);
+    
+    pendingMessages.splice(0,1);  // splice(0,1) == pop first element
+  }
+}
+
+function start()
+{
+    location = '/play';
+}
+
+function OnLoad() {
+    if (location.hostname == '')
+    {
+        alert("Run this page through localhost to work with websocket.");
+        return;
+    }
+
+    if (performance.getEntriesByType("navigation")[0].type == "back_forward")
+    {
+      location.reload();
+      return;
+    }
+
+    socketURL = 'wss://' + location.hostname + '/wss';
+    if (location.port == 8000)
+        socketURL = 'ws://' + location.hostname + ':8001/';
+    socket = new WebSocket(socketURL);
+    socket.addEventListener('message', sockMessage);
+    socket.onerror = function (event) { alert("Websocket error!  Press Ctrl+Shift+R when resolved."); }
+
+    e("gameowner").style.display = "block";
+}
+
+window.onload = OnLoad;
+
+</script>
+</body>
+</html>
 

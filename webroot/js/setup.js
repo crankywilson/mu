@@ -182,8 +182,8 @@ function riverbedloaded(rbtext)
 
 	water = new Water( waterGeometry, {
 		color: '#ffffff',
-		scale: 4,
-		flowDirection: new THREE.Vector2( 0, .6 ),
+		scale: 1.8,
+		flowDirection: new THREE.Vector2( 0, .25 ),
 		textureWidth: 1024,
 		textureHeight: 1024
 	} );
