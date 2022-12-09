@@ -14,6 +14,7 @@ class Player
     constructor()
     {
         this.model = null;
+        this.mixer = null;
         this.dest  = null;
         this.speed = null;
         this.mule  = null;
@@ -24,12 +25,17 @@ class Player
 }
 
 pl = [null, new Player(), new Player(), new Player(), new Player()];
+flags = [];
 
-
-transpGray =  new THREE.MeshPhongMaterial( { color: 0xFFFFFF, transparent:true, opacity:.3 } );
+transpGray =  new THREE.MeshPhongMaterial( { color: 0xFFFFFF, transparent:true, opacity:.5 } );
 plotOverlay = new THREE.Mesh(new THREE.PlaneGeometry(4, 4, 1, 1), transpGray); 
 plotOverlay.rotation.x = -90 * Math.PI / 180;
 
+
+function setupComplete()
+{
+    e("msg").innerText = "Setup complete";
+}
 
 _viewProjectionMatrix = new THREE.Matrix4();
 function unprojectVector( vector, camera ) 

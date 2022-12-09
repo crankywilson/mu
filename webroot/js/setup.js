@@ -1,6 +1,16 @@
 let scene, camera, clock, renderer, water;
-let plmod = [null, null, null, null];
-let dudemixer = [null, null, null, null];
+let plmod = [null, null, null, null];       // r, y, g, b
+let dudemixer = [null, null, null, null];   // r, y, g, b
+let totalModels = 0;
+let totalCalculated = false;
+let modelsLoaded = 0;
+let mulemod = null;
+let flagb = null;
+let redft = null;
+let foodmdl = null;
+let energymdl = null;
+let smithoremdl = null;
+let crystitemdl = null;
 
 function e(el)
 {
@@ -40,8 +50,9 @@ function setup()
 
     // ground
     const textureLoader = new THREE.TextureLoader();
+    totalModels++;
 	textureLoader.load( 'img/sand.jpg', sandLoaded); 
-
+    totalModels++;
     textureLoader.load( 'img/rb.jpg', riverbedloaded);
 
     
@@ -93,12 +104,35 @@ function setup()
 
 	scene.background = cubeTexture;
 
-    const fbxLoader = new FBXLoader()
+    const fbxLoader = new FBXLoader();
+    totalModels++;
 	fbxLoader.load('models/red.fbx', fbxloaded_r, n, n);
+    totalModels++;
     fbxLoader.load('models/yellow.fbx', fbxloaded_y, n, n);
+    totalModels++;
     fbxLoader.load('models/green.fbx', fbxloaded_g, n, n);
+    totalModels++;
     fbxLoader.load('models/blue.fbx', fbxloaded_b, n, n);
 
+    const gltfl = new GLTFLoader();
+    totalModels++;
+	gltfl.load('models/atat/scene.gltf', muleloaded, n, n);
+    totalModels++;
+	gltfl.load('models/plants/plants.gltf', foodloaded, n, n);
+    totalModels++;
+	gltfl.load('models/energy/energy.gltf', energyloaded, n, n);
+    totalModels++;
+	gltfl.load('models/excv/excv.gltf', smithoreloaded, n, n);
+    totalModels++;
+    gltfl.load('models/drill/drill.gltf', crystiteloaded, n, n);
+    totalModels++;
+	gltfl.load('models/blueflag/scene.gltf', flagloaded, n, n);
+
+    const tl = new THREE.TextureLoader();
+    totalModels++;
+    tl.load('img/redf.png', function(t) { redft = t; loadProgress(); });
+
+    totalCalculated = true;
 	window.addEventListener( 'resize', onWindowResize );
 	onWindowResize();
 
@@ -117,6 +151,15 @@ function onWindowResize() {
 
 }
 
+function loadProgress()
+{
+    modelsLoaded++;
+    e("msg").innerText = "Model " + modelsLoaded + "  of " + totalModels + " loaded";
+    
+    if (totalCalculated && modelsLoaded == totalModels)
+        setupComplete();
+}
+
 function fbxloaded(dude, n, x, z)
 {
     dude.scale.set(.004,.0025,.004);
@@ -127,40 +170,106 @@ function fbxloaded(dude, n, x, z)
     dudemixer[n] = new THREE.AnimationMixer(dude);
     let action = dudemixer[n].clipAction( dude.animations[0] );
     action.play();
-
+    dudemixer[n].setTime(.55);
     scene.add(dude);
+
+    loadProgress();
 }
 
 function fbxloaded_r(fbx)
 {
-    e("msg").innerText = "Model 1 of n loaded";
     fbxloaded(fbx, 0, .5, -.3);
 }
 
 function fbxloaded_y(fbx)
 {
-    e("msg").innerText = "Model 2 of n loaded";
     fbxloaded(fbx, 0, .25, -.1);
 }
 
 function fbxloaded_g(fbx)
 {
-    e("msg").innerText = "Model 3 of n loaded";
     fbxloaded(fbx, 0, 0, .1);
 }
 
 function fbxloaded_b(fbx)
 {
-    e("msg").innerText = "Model 4 of n loaded";
     fbxloaded(fbx, 0, -.25, .3);
 }
 
+function muleloaded(mule)
+{
+    mulemod = mule.scene;
+    mulemod.scale.set(.06,.05,.06);
+    mulemod.rotation.y = Math.PI;
+    mulemod.position.set(1.1,0,1.1);
+    let mixer = new THREE.AnimationMixer(mule.scene);
+    let action = mixer.clipAction( mule.animations[ 0 ] );
+    action.play();
+    mixer.setTime(7);
 
+    loadProgress();
+}
+
+function foodloaded(mdl)
+{
+    foodmdl = mdl.scene;
+    foodmdl.scale.set(100,50,100);
+    foodmdl.rotation.y = Math.PI;
+    foodmdl.position.set(0,-.15,-4);
+    scene.add(foodmdl);
+
+    loadProgress();
+}
+
+function energyloaded(mdl)
+{
+    energymdl = mdl.scene;
+    energymdl.scale.set(.5,.5,.5);
+    energymdl.rotation.y = 1.8;
+    energymdl.position.set(4,0,-4);
+    scene.add(energymdl);
+
+    loadProgress();
+}
+
+function smithoreloaded(mdl)
+{
+    smithoremdl = mdl.scene;
+    smithoremdl.scale.set(10,10,10);
+    smithoremdl.rotation.y = -1;
+    smithoremdl.position.set(-4,-0,0);
+    scene.add(smithoremdl);
+
+    loadProgress();
+}
+
+function crystiteloaded(mdl)
+{
+    crystitemdl = mdl.scene;
+    crystitemdl.scale.set(30,30,30);
+    crystitemdl.position.set(-4,-0,-4);
+    scene.add(crystitemdl);
+
+    loadProgress();
+}
+
+function flagloaded(fl)
+{
+    flagb = fl.scene;
+    flagb.scale.set(.2,.2,.2);
+    //flagb.rotation.y = Math.PI;
+    flagb.position.set(1.1,.4,-.8);
+    let mixer = new THREE.AnimationMixer(fl.scene);
+    let action = mixer.clipAction( fl.animations[ 0 ] );
+    action.play();
+    //mixer[n].setTime(7);
+    scene.add(flagb);
+    flags.push({scene:fl.scene, mixer:mixer});
+    loadProgress();
+}
 
 function riverbedloaded(rbtext)
 {
-    e("msg").innerText = "Texture 2 of n loaded";
-
     const groundGeometry4 = new THREE.PlaneGeometry( 60, 25 );
     const groundMaterial4 = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.4 } );
 
@@ -191,13 +300,13 @@ function riverbedloaded(rbtext)
 	water.position.y = -.1;
 	water.rotation.x = Math.PI * - 0.5;
 	scene.add( water );
+
+    loadProgress();
 }
 
 
 function sandLoaded(sandtexture)
 {
-    e("msg").innerText = "Texture 1 of n loaded";
-
     const groundMaterial = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.4 } );
     sandtexture.wrapS = THREE.RepeatWrapping;
     sandtexture.wrapT = THREE.RepeatWrapping;
@@ -228,5 +337,7 @@ function sandLoaded(sandtexture)
     ground3.position.y = 0;
     ground3.rotation.x = Math.PI * - 0.5;
     scene.add( ground3 );
+
+    loadProgress();
 }
 
