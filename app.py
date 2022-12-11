@@ -10,7 +10,9 @@ players : Dict[int, Player] = {}
 playerCounter = 0
 
 def playerAndGameForToken(tok:str):
+  import urllib.parse
   try:
+    tok = urllib.parse.unquote(tok)
     l = fernet.decrypt(tok).decode().split()
     gid = int(l[0])
     pid = int(l[1])
@@ -27,6 +29,7 @@ def addPlayer():
   playerCounter += 1
   p = Player()
   p.id = playerCounter
+  p.name = f'Player{p.id}'
   players[p.id] = p
   return p
 
@@ -36,9 +39,11 @@ def getPlayer(id:int):
     return players[id]
   if id >= playerCounter:
     playerCounter = id - 1
-  return addPlayer()
+  p = addPlayer()
+  p.id = id
+  return p
   
 def getToken(g:Game,p:Player):
   l = f"{g.id} {p.id}"
-  return fernet.encrypt(l.encode())
+  return fernet.encrypt(l.encode()).decode()
   

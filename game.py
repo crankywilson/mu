@@ -1,5 +1,5 @@
 from typing import Tuple, Optional, List, Dict, Any
-from player import Player
+from player import Player, NOPLAYER
 from plot import Plot
 from consts import Res
 from asyncio import Future, create_task
@@ -13,7 +13,7 @@ class Game:
     self.id = id
     self.started = False
     self.players : List[Player] = []
-    self.store = Player()
+    self.store = NOPLAYER
     self.state = ''
     self.stateParams = []
     self.resourcePrices = [15,10,40,100]
@@ -40,11 +40,37 @@ class Game:
 
     self.store.name = "STORE"
 
-    if len(msgHandlers) == 0:
+    if len(msgHandlers) == 0 and id >= 0:
       import msgs
       from inspect import getmembers, isfunction 
       for i in getmembers(msgs, isfunction):
         msgHandlers[i[0]]=i[1]
+
+  def addPlayerWithNextAvailChar(self, p : Player):
+    self.players.append(p)
+    availChars = [1,2,3,4]
+    for other in self.players:
+      if other.character in availChars:
+        availChars.remove(other.character)
+    if len(availChars) > 0:
+      p.character = availChars[0]
+
+  def playerState(self, client : Optional[Player] = None):
+    retVal = {}
+    for p in self.players:
+      entry = {}
+      entry['id'] = p.id
+      entry['ipsrc'] = p.ipsrc
+      entry['connected'] = p.ws is not None
+      entry['name'] = p.name
+      entry['character'] = p.character 
+      entry['money'] = p.money
+      entry['score'] =  p.score
+      entry['ranking'] = p.ranking
+      retVal[p.id] = entry
+    if client is not None:
+      retVal['youAre'] = client.id
+    return retVal
 
   # not written for thread safety (incomingMsgs not locked) -- assumes only asyncio is being used with this method, eg method is atomic
   def processIncomingMsg(self, itm : Tuple[Player, str, Future]):

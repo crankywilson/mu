@@ -3,19 +3,17 @@ import websockets.server
 
 class Player:
   def __init__(self):
-    self.id = 0    # global ID across all games
-    self.plnum = 0 # number 1-4 communicated to browser once game established 
+    self.id = 0    # global ID across all games - only client should be app.addPlayer
     self.ipsrc = 'Unknown'
     self.ws : Optional[websockets.server.WebSocketServerProtocol] = None
-    self.name : Optional[str] = None    # once this name changes, player cannot be re-assigned
-    self.species = 0
-    self.color = 0
+    self.name : Optional[str] = None
+    self.character = 0
     self.score = 0
     self.ranking = 1
     self.money = 1000
     self.resources = [3,2,0,0]
     self.production = [0,0,0,0]
-    self.slot = 1
+    self.switchedGames = False   # set this to update websocket processing
 
     #auction state vals
     self.criticalLevel = 0

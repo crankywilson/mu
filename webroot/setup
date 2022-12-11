@@ -22,46 +22,46 @@ text-align: center;
 
 <body>
 <div>MULE</div>
-<div id="gameowner" style="display: none;">You are the game owner. <button onclick="start()">START</button></div>
+<div id="gamestarter" style="display: none;">You are the game starter. <button onclick="start()">START</button></div>
 <br>
-<div>Your Name: <input type="text" id="name"></div>
+<div>Your Name: <input type="text" id="name" oninput="nchange()" maxlength="16"></div>
 <P>
-<div id="avail">
+<span id="avail">
 Available characters, click to change yours:
-<img id="red" src="img/red.png">
-<img id="yellow" src="img/yellow.png">
-<img id="green" src="img/green.png">
-<img id="blue" src="img/blue.png">
+<img id="a1" style="display: none;" src="img/red.png" onclick="chchange(1)">
+<img id="a2" style="display: none;" src="img/yellow.png" onclick="chchange(2)">
+<img id="a3" style="display: none;" src="img/green.png" onclick="chchange(3)">
+<img id="a4" style="display: none;" src="img/blue.png" onclick="chchange(4)">
 </div>
 <P>
 <table width="80%">
     <tr>
-        <td id="p1" width="25%"><span id="n1">Player 1</span>
+        <td id="p1" width="25%" style="visibility: hidden;"><span id="n1">Player 1</span>
         <BR><span id="i1">123.45.67.89</span>
         <BR><img id="c1" src="img/red.png">
-        <BR><button id="k1">Kick</button>
-        <BR><button id="s1">Switch</button>
+        <BR><button id="k1" style="visibility: hidden;">Kick</button>
+        <BR><button id="s1" style="visibility: hidden;">Switch</button>
         </td>
 
-        <td id="p2" width="25%"><span id="n1">Player 2</span>
-        <BR><span id="i1">123.45.67.89</span>
-        <BR><img id="c1" src="img/yellow.png">
-        <BR><button id="k1">Kick</button>
-        <BR><button id="s1">Switch</button>
+        <td id="p2" width="25%" style="visibility: hidden;"><span id="n2">Player 2</span>
+        <BR><span id="i2">123.45.67.89</span>
+        <BR><img id="c2" src="img/yellow.png">
+        <BR><button id="k2" style="visibility: hidden;">Kick</button>
+        <BR><button id="s2" style="visibility: hidden;">Switch</button>
         </td>
 
-        <td id="p3" width="25%"><span id="n1">Player 3</span>
-        <BR><span id="i1">123.45.67.89</span>
-        <BR><img id="c1" src="img/green.png">
-        <BR><button id="k1">Kick</button>
-        <BR><button id="s1">Switch</button>
+        <td id="p3" width="25%" style="visibility: hidden;"><span id="n3">Player 3</span>
+        <BR><span id="i3">123.45.67.89</span>
+        <BR><img id="c3" src="img/green.png">
+        <BR><button id="k3" style="visibility: hidden;">Kick</button>
+        <BR><button id="s3" style="visibility: hidden;">Switch</button>
         </td>
 
-        <td id="p4" width="25%"><span id="n1">Player 4</span>
-        <BR><span id="i1">123.45.67.89</span>
-        <BR><img id="c1" src="img/blue.png">
-        <BR><button id="k1">Kick</button>
-        <BR><button id="s1">Switch</button>
+        <td id="p4" width="25%" style="visibility: hidden;"><span id="n4">Player 4</span>
+        <BR><span id="i4">123.45.67.89</span>
+        <BR><img id="c4" src="img/blue.png">
+        <BR><button id="k4" style="visibility: hidden;">Kick</button>
+        <BR><button id="s4" style="visibility: hidden;">Switch</button>
         </td>
 
     <tr>
@@ -78,11 +78,90 @@ function hmUpdateName(m)
     document.getElementById("n" + m.token).innerHTML = "<B>" + m.name + "</B>";
 }
 
+myID = -1;
+function hmIdentity(m)
+{
+  document.cookie="t="+window.escape(m.token) + ";Max-Age=86400";
+  myID = m.id;
+}
+
+imgsrc = ["", "img/red.png", "img/yellow.png", "img/green.png", "img/blue.png"]
+showButtons = false;
+function hmPlayerState(m)
+{
+  avail = [1,2,3,4]
+  num = 0;
+  firstPlayerCheck = true;
+
+  for (i in m)
+  {
+    if (i == 'msg')
+      continue;
+    num++;
+    if (num > 4)
+      break;
+    p = m[i];
+    avail = avail.filter((val)=>{return val!=p.character;})
+    col = e('p' + num);
+    col.style.visibility = 'visible';
+    e('n' + num).innerText = p.name;
+    e('i' + num).innerText = p.ipsrc;
+    e('c' + num).src = imgsrc[p.character];
+    
+    if (p.id == myID && e('name').innerText == '')
+      e('name').value = p.name;
+
+    if (firstPlayerCheck)
+    { 
+      if (myID == p.id)
+      {
+        e('gamestarter').style.display = 'inline';
+        showButtons = true;
+      }
+      firstPlayerCheck = false;
+    }
+
+    if (showButtons)
+    {
+      e('k'+num).style.visibility = 'visible';
+      e('s'+num).style.visibility = 'visible';
+    }
+
+  }
+
+  for (i=1; i<5; i++) e('a' + i).style.display = 'none';
+  for (i of avail) e('a' + i).style.display = 'inline';
+}
+
+
+function nchange()
+{
+    socket.send(JSON.stringify({
+        msg: "NameChange",
+        name: document.getElementById("name").value
+    }));
+}
+
+function chchange(n)
+{
+    e('a' + i).style.display = 'none';
+    socket.send(JSON.stringify({
+        msg: "CharacterChange",
+        character: n
+    }));
+}
+
+
+socket = null;
+function websocketOpened(event)
+{
+  socket.send(JSON.stringify({msg: "Ready"}));
+}
 
 pendingMessages = []  // queue up newer messages
 function sockMessage(event)
 {
-  //console.log('Got: ' + event.data)
+  console.log('Got: ' + event.data)
 
   // don't process new message until all older ones have had processing completed
   pendingMessages.push(event.data);
@@ -93,7 +172,7 @@ function sockMessage(event)
   {
       let m = pendingMessages[0];
       let o = JSON.parse(m);
-      fname = ('hm' + o.type);
+      fname = ('hm' + o.msg);
       if (fname in window && typeof(window[fname]) == "function")
         window[fname](o);
     
@@ -101,9 +180,16 @@ function sockMessage(event)
   }
 }
 
+function hmStart()
+{ 
+    location = '/play' + location.search;
+}
+
+
 function start()
 {
-    location = '/play';
+  socket.send(JSON.stringify({msg: "Start"}));
+  e('gamestarter').style.display = 'none';
 }
 
 function OnLoad() {
@@ -121,12 +207,16 @@ function OnLoad() {
 
     socketURL = 'wss://' + location.hostname + '/wss';
     if (location.port == 8000)
-        socketURL = 'ws://' + location.hostname + ':8001/';
+      socketURL = 'ws://' + location.hostname + ':8001/';
+    if (location.search.length > 0)
+      socketURL += location.search;
+    else if (document.cookie.length > 0)
+      socketURL += '?' + document.cookie;
     socket = new WebSocket(socketURL);
     socket.addEventListener('message', sockMessage);
     socket.onerror = function (event) { alert("Websocket error!  Press Ctrl+Shift+R when resolved."); }
+    socket.onopen = websocketOpened;
 
-    e("gameowner").style.display = "block";
 }
 
 window.onload = OnLoad;

@@ -43,8 +43,8 @@ specialPaths = {
 class _handler(http.server.SimpleHTTPRequestHandler):
   def __init__(self, *args, **kwargs):
     try:
-      super().__init__(*args, directory='webroot', **kwargs)
       self.extensions_map[''] = 'text/html'
+      super().__init__(*args, directory='webroot', **kwargs)
     except:
       pass
 

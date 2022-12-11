@@ -11,14 +11,19 @@ let foodmdl = null;
 let energymdl = null;
 let smithoremdl = null;
 let crystitemdl = null;
+let buildingsGroup = null;
+const buildingColor = 0x666666;
 
 function e(el)
 {
   return document.getElementById(el);
 }
 
+
 function setup()
 {
+    setupWebsock();
+
     scene = new THREE.Scene();
 
     // camera
@@ -54,45 +59,82 @@ function setup()
 	textureLoader.load( 'img/sand.jpg', sandLoaded); 
     totalModels++;
     textureLoader.load( 'img/rb.jpg', riverbedloaded);
+    totalModels++;
+    textureLoader.load( 'img/mountains.jpg', mountainsLoaded);
 
-    
+    // mounds
+    const moundMat = new THREE.MeshBasicMaterial( { color: 0x847463 } );
+    for (i=0; i<20; i++)
+    {
+        const geometry = new THREE.SphereGeometry( 1 );
+        const sphere = new THREE.Mesh( geometry, moundMat );
+        scene.add( sphere );
+        let x = Math.random();
+        x -= .5;
+        x *= 32;
+        x += Math.sign(x) * 2;
+        let z = Math.random();
+        z -= .5;
+        z *= 16;
+        z += Math.sign(z) * 2;
+        sphere.position.set(x,0,z);
+        let scaleX = .2 + ((Math.random() - .2) / 4);
+        let scaleY = .2 + ((Math.random()) / 3);
+        let scaleZ = .2 + ((Math.random() - .2) / 4);
+        sphere.scale.set(scaleX, scaleY, scaleZ);
+        sphere.rotation.y = Math.random() * 6.28;
+    }
+
 	// buildings
-	const bm = new THREE.MeshLambertMaterial( {color: 0x666666, reflectivity: 15} );
+    buildingsGroup = new THREE.Group()
+	const bm = [];
+    for (i=0; i<8; i++)
+      bm[i] = new THREE.MeshLambertMaterial( {color: buildingColor, reflectivity: 15} );
+
+    bm[0].name = 'Crystite';
+    bm[1].name = 'Smithore';
+    bm[2].name = 'Energy';
+    bm[3].name = 'Food';
+    bm[4].name = 'Assay';
+    bm[5].name = 'Land';
+    bm[6].name = 'Cantina';
+    bm[7].name = 'Mule';
 
 	for (i=0; i<4; i++)
 	{
 		let b1g = new THREE.BoxGeometry( .5, .4, .1 );
-		let b1mesh = new THREE.Mesh( b1g, bm );
+		let b1mesh = new THREE.Mesh( b1g, bm[i] );
 		b1mesh.position.set(-1.1 + i*.7333, .2, -1.6);
-		scene.add( b1mesh );
+		buildingsGroup.add( b1mesh );
 
 		let b2g = new THREE.BoxGeometry( .5, .4, .1 );
-		let b2mesh = new THREE.Mesh( b2g, bm );
+		let b2mesh = new THREE.Mesh( b2g, bm[i+4] );
 		b2mesh.position.set(-1.1 + i*.7333, .2, 1.6);
-		scene.add( b2mesh );
+		buildingsGroup.add( b2mesh );
 
 		let b1gl = new THREE.BoxGeometry( .1, .4, .5 );
-		let b1lmesh = new THREE.Mesh( b1gl, bm );
+		let b1lmesh = new THREE.Mesh( b1gl, bm[i] );
 		b1lmesh.position.set(-.9 + i*.7333, .2, -1.3);
-		scene.add( b1lmesh );
+		buildingsGroup.add( b1lmesh );
 
 		let b1gr = new THREE.BoxGeometry( .1, .4, .5 );
-		let b1rmesh = new THREE.Mesh( b1gr, bm );
+		let b1rmesh = new THREE.Mesh( b1gr, bm[i] );
 		b1rmesh.position.set(-1.3 + i*.7333, .2, -1.3);
-		scene.add( b1rmesh );
+		buildingsGroup.add( b1rmesh );
 
 		let b2gr = new THREE.BoxGeometry( .1, .4, .5 );
-		let b2rmesh = new THREE.Mesh( b2gr, bm );
+		let b2rmesh = new THREE.Mesh( b2gr, bm[i+4] );
 		b2rmesh.position.set(-1.3 + i*.7333, .2, 1.3);
-		scene.add( b2rmesh );
+		buildingsGroup.add( b2rmesh );
 
 		let b2gl = new THREE.BoxGeometry( .1, .4, .5 );
-		let b2lmesh = new THREE.Mesh( b2gl, bm );
+		let b2lmesh = new THREE.Mesh( b2gl, bm[i+4] );
 		b2lmesh.position.set(-.9 + i*.7333, .2, 1.3);
-		scene.add( b2lmesh );
+		buildingsGroup.add( b2lmesh );
 	}
+    scene.add(buildingsGroup);
 
-    // skybox
+    /* skybox
 
 	const cubeTextureLoader = new THREE.CubeTextureLoader();
 
@@ -103,16 +145,8 @@ function setup()
 	] );
 
 	scene.background = cubeTexture;
-
-    const fbxLoader = new FBXLoader();
-    totalModels++;
-	fbxLoader.load('models/red.fbx', fbxloaded_r, n, n);
-    totalModels++;
-    fbxLoader.load('models/yellow.fbx', fbxloaded_y, n, n);
-    totalModels++;
-    fbxLoader.load('models/green.fbx', fbxloaded_g, n, n);
-    totalModels++;
-    fbxLoader.load('models/blue.fbx', fbxloaded_b, n, n);
+    */
+    scene.background = new THREE.Color( 0xffeedd );
 
     const gltfl = new GLTFLoader();
     totalModels++;
@@ -132,7 +166,6 @@ function setup()
     totalModels++;
     tl.load('img/redf.png', function(t) { redft = t; loadProgress(); });
 
-    totalCalculated = true;
 	window.addEventListener( 'resize', onWindowResize );
 	onWindowResize();
 
@@ -176,25 +209,6 @@ function fbxloaded(dude, n, x, z)
     loadProgress();
 }
 
-function fbxloaded_r(fbx)
-{
-    fbxloaded(fbx, 0, .5, -.3);
-}
-
-function fbxloaded_y(fbx)
-{
-    fbxloaded(fbx, 0, .25, -.1);
-}
-
-function fbxloaded_g(fbx)
-{
-    fbxloaded(fbx, 0, 0, .1);
-}
-
-function fbxloaded_b(fbx)
-{
-    fbxloaded(fbx, 0, -.25, .3);
-}
 
 function muleloaded(mule)
 {
@@ -216,7 +230,7 @@ function foodloaded(mdl)
     foodmdl.scale.set(100,50,100);
     foodmdl.rotation.y = Math.PI;
     foodmdl.position.set(0,-.15,-4);
-    scene.add(foodmdl);
+    //scene.add(foodmdl);
 
     loadProgress();
 }
@@ -227,7 +241,7 @@ function energyloaded(mdl)
     energymdl.scale.set(.5,.5,.5);
     energymdl.rotation.y = 1.8;
     energymdl.position.set(4,0,-4);
-    scene.add(energymdl);
+    //scene.add(energymdl);
 
     loadProgress();
 }
@@ -238,7 +252,7 @@ function smithoreloaded(mdl)
     smithoremdl.scale.set(10,10,10);
     smithoremdl.rotation.y = -1;
     smithoremdl.position.set(-4,-0,0);
-    scene.add(smithoremdl);
+    //scene.add(smithoremdl);
 
     loadProgress();
 }
@@ -248,7 +262,7 @@ function crystiteloaded(mdl)
     crystitemdl = mdl.scene;
     crystitemdl.scale.set(30,30,30);
     crystitemdl.position.set(-4,-0,-4);
-    scene.add(crystitemdl);
+    //scene.add(crystitemdl);
 
     loadProgress();
 }
@@ -257,20 +271,34 @@ function flagloaded(fl)
 {
     flagb = fl.scene;
     flagb.scale.set(.2,.2,.2);
-    //flagb.rotation.y = Math.PI;
     flagb.position.set(1.1,.4,-.8);
     let mixer = new THREE.AnimationMixer(fl.scene);
     let action = mixer.clipAction( fl.animations[ 0 ] );
     action.play();
-    //mixer[n].setTime(7);
-    scene.add(flagb);
-    flags.push({scene:fl.scene, mixer:mixer});
+    //scene.add(flagb);
+    //flags.push({scene:fl.scene, mixer:mixer});
+    loadProgress();
+}
+
+gmo = null;
+function mountainsLoaded(mt)
+{
+    const mp = new THREE.PlaneGeometry( 50, 8 );
+    const mm = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.4 } );
+    mt.wrapS = THREE.RepeatWrapping;
+    mt.wrapT = THREE.RepeatWrapping;
+    mt.anisotropy = 16;
+    mt.repeat.set( 1, 1 );
+    mm.map = mt;
+    gmo = new THREE.Mesh( mp, mm );
+    gmo.position.set(0,4,-11);
+    scene.add(gmo);
     loadProgress();
 }
 
 function riverbedloaded(rbtext)
 {
-    const groundGeometry4 = new THREE.PlaneGeometry( 60, 25 );
+    const groundGeometry4 = new THREE.PlaneGeometry( 60, 30 );
     const groundMaterial4 = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.4 } );
 
     rbtext.wrapS = THREE.RepeatWrapping;

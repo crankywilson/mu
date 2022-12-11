@@ -85,6 +85,35 @@ function highlightPlot(plot)
     }
 }
 
+_raycaster = new THREE.Raycaster();
+_pointer = new THREE.Vector2();
+function settlementMouseMove(x, y)
+{
+    _pointer.x = ( x / window.innerWidth ) * 2 - 1;
+	_pointer.y = - ( y / window.innerHeight ) * 2 + 1;
+    _raycaster.setFromCamera( _pointer, camera );
+	const intersects = _raycaster.intersectObjects( buildingsGroup.children );
+    for (i=0; i<buildingsGroup.children.length; i++)
+        buildingsGroup.children[i].material.color.set(buildingColor);
+    e("msg").innerText="";
+    e("msg").style.backgroundColor="";
+    if (intersects.length > 0)
+    {
+        intersects[0].object.material.color.set( 0x999999 );
+        e("msg").innerText=intersects[0].object.material.name;
+        e("msg").style.backgroundColor="rgba(255,255,255,.4)";
+    }
+    else
+    {
+        let plot = getPlotForMouse(x, y);
+        if (plot.x != 0)
+        {
+            e("msg").innerText="Leave Settlement";
+            e("msg").style.backgroundColor="rgba(255,255,255,.4)";
+        }
+    }
+}
+
 function mouseMove(mouseEvent)
 {
     let x = mouseEvent.pageX;// - view.getBoundingClientRect().x, 
@@ -97,6 +126,10 @@ function mouseMove(mouseEvent)
     {
         let plot = getPlotForMouse(x, y);
         highlightPlot(plot);
+    }
+    else if (state == st.SETTLEMENT)
+    {
+        settlementMouseMove(x, y);
     }
 }
 
@@ -123,6 +156,8 @@ function mouseDown(mouseEvent)
         if (plot.x != 0)
         {
             state = st.TRANSITION_OUT_STLMNT;
+            e("msg").innerText="";
+            e("msg").style.backgroundColor="";
         }
     }
 }

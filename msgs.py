@@ -1,12 +1,42 @@
-from game import Game
-from player import Player
+from game import Game, UNASSIGNED
+from player import Player, NOPLAYER
 import app
 
+
 def hmConnected(g:Game, p:Player, msg:dict):
-  g.send('Connected', {"id":p.id,"name":p.name})
+  # here we will just assign player to the only game
+  if g is UNASSIGNED:
+    app.games[1].addPlayerWithNextAvailChar(p)
+    p.switchedGames = True
+
 
 def hmDisconnected(g:Game, p:Player, msg:dict):
   g.send('Disconnected', {"id":p.id,"name":p.name})
 
+
 def hmReady(g:Game, p:Player, msg:dict):
-  g.send('Token', {"id":app.getToken(g, p)}, p)
+  g.send('Identity', {"id":p.id, "token":app.getToken(g,p)}, p)
+  g.send('PlayerState', g.playerState())
+
+
+def hmNameChange(g:Game, p:Player, msg:dict):
+  p.name = msg['name']
+  g.send('PlayerState', g.playerState())
+
+
+def hmCharacterChange(g:Game, p:Player, msg:dict):
+  newChar = msg['character']
+  for p in g.players:
+    if p.character == newChar:
+      return
+  if newChar < 1 or newChar > 4:
+    return
+  p.character = newChar
+  g.send('PlayerState', g.playerState())
+
+
+def hmStart(g:Game, p:Player, msg:dict):
+  g.started = True
+  g.send('Start')
+
+

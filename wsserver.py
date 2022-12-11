@@ -20,10 +20,12 @@ async def newConnection(ws:websockets.server.WebSocketServerProtocol, path:str):
   p.ipsrc = remote
   
   await processMsg(ws, '{"msg":"Connected"}', p, g)
+  g = newGameIfUpdated(p, g)
 
   async for msg in ws:
     if type(msg) is str:
       await messageReceived(ws, msg, p, g)
+      g = newGameIfUpdated(p, g)
 
   p.ws = None
 
@@ -42,13 +44,13 @@ async def connectionClosed(ws:websockets.server.WebSocketServerProtocol, p:Playe
 def getPlayerAndGame(ws:websockets.server.WebSocketServerProtocol, path:str):
   p = None
   g = UNASSIGNED
-  if path.find("?z="):
+  if path.find("?p=") > 0:
     try:
       p = app.getPlayer(int(path.split('=')[1]))
     except:
       pass
 
-  if p is None and path.find("?tok="):
+  elif path.find("?t=") > 0:
     try:
       p, g = app.playerAndGameForToken(path.split('=')[1])
     except:
@@ -56,7 +58,14 @@ def getPlayerAndGame(ws:websockets.server.WebSocketServerProtocol, path:str):
 
   if p is None:
     p = app.addPlayer()
-
+  else:
+    for g in app.games.values():
+      if p in g.players:
+        break
+  
+  if p not in g.players:
+    g = UNASSIGNED
+    
   p.ws = ws
   return p, g
 
@@ -72,8 +81,19 @@ async def processMsg(ws:websockets.server.WebSocketServerProtocol, msg:str, p:Pl
   # now qitem should be head of g.incomingMsgs
   g.processIncomingMsg(qitem)
 
-  # give tasks created (ie socket sends) a chance to run before processing next message
+  # give tasks created (e.g. socket send reqs) a chance to run before processing next message
   await asyncio.sleep(0)
+
+
+def  newGameIfUpdated(p : Player, g : Game):
+  if not p.switchedGames:
+    return g
+  p.switchedGames = False
+  for g in app.games.values():
+    if p in g.players:
+      return g
+  
+  raise Exception("can't find game player belongs to")
 
 
 eventLoop : Optional[asyncio.AbstractEventLoop] = None

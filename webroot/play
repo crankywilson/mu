@@ -23,26 +23,30 @@ position: fixed;
 
 <div id="p1" 
  style="top: 1%;left: 5%; width: 15%; height: 8%; background-color: rgba(255,0,0,.2);">
- P1<br>
- (₿) 1000<br>
+ <span name="n"></span><br>
+ (₿) <span name="m">1000</span><br>
+ <span name="t"></span>
 </div>
 
 <div id="p2" 
  style="top: 1%;left: 30%; width: 15%; height: 8%; background-color: rgba(255,255,0,.2);">
- P2<br>
- (₿) 1000
+ <span name="n"></span><br>
+ (₿) <span name="m">1000</span><br>
+ <span name="t"></span>
 </div>
 
 <div id="p3" 
  style="top: 1%;left: 55%; width: 15%; height: 8%; background-color: rgba(0,255,0,.2);">
- P3<br>
- (₿) 1000
+ <span name="n"></span><br>
+ (₿) <span name="m">1000</span><br>
+ <span name="t"></span>
 </div>
 
 <div id="p4" 
  style="top: 1%;left: 80%; width: 15%; height: 8%; background-color: rgba(0,0,255,.2);">
- P4<br>
- (₿) 1000
+ <span name="n"></span><br>
+ (₿) <span name="m">1000</span><br>
+ <span name="t"></span>
 </div>
 
 <div id="msg"
@@ -58,6 +62,7 @@ position: fixed;
 <script src="three/water2.js"></script>
 <script src="three/fbxLoader.js"></script>
 <script src="three/fflate.min.js"></script>
+<script src="js/websock.js"></script>
 <script src="js/game.js"></script>
 <script src="js/render.js"></script>
 <script src="js/setup.js"></script>
