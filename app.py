@@ -12,8 +12,8 @@ playerCounter = 0
 def playerAndGameForToken(tok:str):
   import urllib.parse
   try:
-    tok = urllib.parse.unquote(tok)
-    l = fernet.decrypt(tok).decode().split()
+    tokBytes = urllib.parse.unquote(tok).encode()
+    l = fernet.decrypt(tokBytes).decode().split()
     gid = int(l[0])
     pid = int(l[1])
     g = games[gid] if gid in games else None

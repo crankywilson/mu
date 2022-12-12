@@ -146,8 +146,8 @@ class Game:
     t = self.timerTask
     await sleep(secs)
     if t is self.timerTask:
-      fn(param)
       self.timerTask = None
+      fn(param)
     else:
       print("timer task got unsychronized")
 
