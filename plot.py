@@ -6,6 +6,6 @@ class Plot:
     self.owner = NOPLAYER
     self.resource = Res.UNDEF
     self.mounds = 0
-    self.moundFormation = 0
+    self.moundGeom = []
     self.assay = 0
     self.prod = 0

@@ -28,8 +28,8 @@ def redirect(handler : http.server.SimpleHTTPRequestHandler, newPath:str, cookie
 
 def handleRoot(handler : http.server.SimpleHTTPRequestHandler):
   cookie = SimpleCookie(handler.headers.get('Cookie'))
-  if "tok" in cookie:
-    tok=cookie["tok"].value
+  if "t" in cookie:
+    tok=cookie["t"].value
     p, g = app.playerAndGameForToken(tok)
     if p is not None and g.started:
       return redirect(handler, '/play')

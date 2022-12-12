@@ -106,3 +106,17 @@ function hmPlayerState(m)
     scores[p.id] = p.score;
   }
 }
+
+function hmMounds(m)
+{
+  const moundMat = new THREE.MeshBasicMaterial( { color: 0x847463 } );
+  for (let d of m['mounds'])
+  {
+    const geometry = new THREE.SphereGeometry( 1 );
+    const sphere = new THREE.Mesh( geometry, moundMat );
+    scene.add( sphere );
+    sphere.position.set(d[0],0,d[2]);
+    sphere.scale.set(d[3], d[4], d[5]);
+    sphere.rotation.y = d[1];
+  }
+}

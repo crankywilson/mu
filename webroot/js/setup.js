@@ -61,29 +61,7 @@ function setup()
     textureLoader.load( 'img/rb.jpg', riverbedloaded);
     totalModels++;
     textureLoader.load( 'img/mountains.jpg', mountainsLoaded);
-
-    // mounds
-    const moundMat = new THREE.MeshBasicMaterial( { color: 0x847463 } );
-    for (i=0; i<20; i++)
-    {
-        const geometry = new THREE.SphereGeometry( 1 );
-        const sphere = new THREE.Mesh( geometry, moundMat );
-        scene.add( sphere );
-        let x = Math.random();
-        x -= .5;
-        x *= 32;
-        x += Math.sign(x) * 2;
-        let z = Math.random();
-        z -= .5;
-        z *= 16;
-        z += Math.sign(z) * 2;
-        sphere.position.set(x,0,z);
-        let scaleX = .2 + ((Math.random() - .2) / 4);
-        let scaleY = .2 + ((Math.random()) / 3);
-        let scaleZ = .2 + ((Math.random() - .2) / 4);
-        sphere.scale.set(scaleX, scaleY, scaleZ);
-        sphere.rotation.y = Math.random() * 6.28;
-    }
+    
 
 	// buildings
     buildingsGroup = new THREE.Group()

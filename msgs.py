@@ -1,4 +1,4 @@
-from game import Game, UNASSIGNED
+from game import Game, GameState, UNASSIGNED
 from player import Player, NOPLAYER
 import app
 
@@ -17,6 +17,13 @@ def hmDisconnected(g:Game, p:Player, msg:dict):
 def hmReady(g:Game, p:Player, msg:dict):
   g.send('Identity', {"id":p.id, "token":app.getToken(g,p)}, p)
   g.send('PlayerState', g.playerState())
+  if g.started:
+    g.send('Mounds', g.mounds(), p)
+  if g.state == GameState.WAITINGFORALLJOIN and p in g.waitingOn:
+    g.waitingOn.remove(p)
+    if len(g.waitingOn) == 0:
+      g.state = GameState.WAITFORLANDGRANT
+      g.send('NewState')
 
 
 def hmNameChange(g:Game, p:Player, msg:dict):
@@ -37,6 +44,7 @@ def hmCharacterChange(g:Game, p:Player, msg:dict):
 
 def hmStart(g:Game, p:Player, msg:dict):
   g.started = True
+  g.waitingOn.extend(g.players)
   g.send('Start')
 
 
