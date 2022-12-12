@@ -102,6 +102,10 @@ function hmPlayerState(m)
     let spans = pb.getElementsByTagName('span');
     spans[0].innerText = p.name;
     spans[1].innerText = p.money;
+    if (!p.connected) 
+      spans[2].innerText = '(DISCONNECTED)';
+    else if (spans[2].innerText == '(DISCONNECTED)')
+      spans[2].innerText = '';
     pb.style.backgroundColor = colorsForChar[p.character];
     scores[p.id] = p.score;
   }
@@ -119,4 +123,21 @@ function hmMounds(m)
     sphere.scale.set(d[3], d[4], d[5]);
     sphere.rotation.y = d[1];
   }
+}
+
+
+prepSound = (new Audio("/sound/prep.wav"));
+notSound = (new Audio("/sound/not.wav"));
+function hmWAITFORLANDGRANT(m)
+{
+  e("msg").innerText = 'Land grant will begin in about 5 seconds.'
+  prepSound.play();
+}
+
+
+function hmSTARTLANDGRANT(m)
+{
+  e("msg").innerText = 'Land grant:  Click on an available plot to claim.  (Land grant ends in about 30 seconds)'
+  state = st.LANDGRANT;
+  notSound.play();
 }

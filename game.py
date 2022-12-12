@@ -1,8 +1,9 @@
-from typing import Tuple, Optional, List, Dict, Any
+from typing import Tuple, Optional, List, Dict, Set, Callable, Any
 from player import Player, NOPLAYER
 from plot import Plot
 from consts import Res
-from asyncio import Future, create_task
+from asyncio import Future, create_task, Task, sleep
+from collections.abc import Coroutine
 from collections import deque
 import json
 import random
@@ -29,20 +30,27 @@ class Game:
     self.players : List[Player] = []
     self.waitingOn : List[Player] = []
     self.store = NOPLAYER
-    self.state = GameState.WAITFORLANDGRANT
+    self.state = GameState.WAITINGFORALLJOIN
     self.stateParams = []
     self.resourcePrices = [15,10,40,100]
     self.mulePrice = 100
     self.mules = 14
     self.month = 0
-    self.timer = 0.0
+    self.taskRefs : Set[Task] = set() # docs say if you don't keep ref, they could get garbage collected unexpectedly...
+    self.timerTask : Optional[Task] = None
+    self.plots : Dict[Tuple[int, int], Plot] = {}  # key is tuple (e, s) where s in # of units south of the center and e is # east (can be negative)
     self.auctionType = Res.UNDEF
+
+    
+    '''
+    self.timer = 0.0
+    
     self.storeSelling = True  # store doesn't sell in crystite or land, and once sellout occurs in auction, store doesn't sell for rest of auction even if buys
     self.minPrice = 10   # can be raised if store isn't selling
     self.tradeTask : Any = None
     self.buyerConfirmed : Optional[bool] = False
     self.sellerConfirmed : Optional[bool] = False
-    self.plots : Dict[Tuple[int, int], Plot] = {}  # key is tuple (s,e) where s in # of units south of the center and e is # east (can be negative)
+    
     self.playersRespondedForNextState = set()
     self.numLandAuctionsThisMonth = 0
     self.muleRequests = []
@@ -51,6 +59,7 @@ class Game:
     self.possibleBadPlayerEvents = list(range(13,22))
     self.waitingForOtherTraders = False
     self.bidIncr = 1
+    '''
     self.incomingMsgs : deque[Tuple[Player, str, Future]] = deque()
 
     self.store.name = "STORE"
@@ -59,7 +68,8 @@ class Game:
       import msgs
       from inspect import getmembers, isfunction 
       for i in getmembers(msgs, isfunction):
-        msgHandlers[i[0]]=i[1]
+        if i[0].startswith('hm'):
+          msgHandlers[i[0]]=i[1]
 
     if id >= 0:
       self.initPlots()
@@ -122,7 +132,37 @@ class Game:
     msg = json.dumps(d)
     for r in recips:
       if r.ws is not None:
-        create_task(r.ws.send(msg))
+        self.addBackgroundTask(r.ws.send(msg))
+
+
+  def addBackgroundTask(self, coro : Coroutine):
+    task = create_task(coro)
+    self.taskRefs.add(task)
+    task.add_done_callback(self.taskRefs.discard)
+
+
+  # this should only be called via addTimerTask
+  async def _timedCallback(self, secs : float, fn : Callable[[Any], None], param : Any = None):
+    t = self.timerTask
+    await sleep(secs)
+    if t is self.timerTask:
+      fn(param)
+      self.timerTask = None
+    else:
+      print("timer task got unsychronized")
+
+
+  def addTimerTask(self, secs : float, fn : Callable[[Any], None], param : Any = None):
+    if self.timerTask is not None:
+      raise Exception('Already an existing timer reference task...')
+
+    self.timerTask = create_task(self._timedCallback(secs, fn, param))
+
+
+  def cancelTimerTask(self):
+    if self.timerTask is not None:
+      self.timerTask.cancel()
+      self.timerTask = None
 
 
   def assignCrystitie(self, r, c, lvl):

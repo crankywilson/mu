@@ -146,8 +146,6 @@ function setup()
 
 	window.addEventListener( 'resize', onWindowResize );
 	onWindowResize();
-
-    requestAnimationFrame( animate );
 }
 
 function n(ignore)

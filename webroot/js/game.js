@@ -1,4 +1,5 @@
 const st = {
+    WAITINGFORALLJOIN: 'WAITINGFORALLJOIN',
     LANDGRANT: 'LANDGRANT',
     MOVEPLAYER: 'MOVEPLAYER',
     SETTLEMENT: 'SETTLEMENT',
@@ -7,7 +8,7 @@ const st = {
     TRANSITION_OUT_STLMNT: 'TRANSITION_OUT_STLMNT'
 };
 
-state = st.MOVEPLAYER;
+state = st.WAITINGFORALLJOIN;
 
 class Player
 {
@@ -35,6 +36,8 @@ plotOverlay.rotation.x = -90 * Math.PI / 180;
 function setupComplete()
 {
     e("msg").innerText = "Setup complete";
+    socket.send(JSON.stringify({msg: "SetupComplete"}));
+    requestAnimationFrame( animate );
 }
 
 _viewProjectionMatrix = new THREE.Matrix4();

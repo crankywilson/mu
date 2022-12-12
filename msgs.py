@@ -19,11 +19,25 @@ def hmReady(g:Game, p:Player, msg:dict):
   g.send('PlayerState', g.playerState())
   if g.started:
     g.send('Mounds', g.mounds(), p)
+
+
+def hmSetupComplete(g:Game, p:Player, msg:dict):
   if g.state == GameState.WAITINGFORALLJOIN and p in g.waitingOn:
     g.waitingOn.remove(p)
-    if len(g.waitingOn) == 0:
-      g.state = GameState.WAITFORLANDGRANT
-      g.send('NewState')
+  if len(g.waitingOn) == 0:
+    g.state = GameState.WAITFORLANDGRANT
+    g.send('WAITFORLANDGRANT')
+    g.addTimerTask(5, startLandGrant, g)
+
+
+def startLandGrant(g : Game):
+  g.state = GameState.LANDGRANT
+  g.send('STARTLANDGRANT')
+  g.addTimerTask(30, landGrantTimeUp, g)
+
+
+def landGrantTimeUp(g : Game):
+  pass
 
 
 def hmNameChange(g:Game, p:Player, msg:dict):
