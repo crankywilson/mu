@@ -67,7 +67,7 @@ class Game:
     if len(msgHandlers) == 0 and id >= 0:
       import msgs
       from inspect import getmembers, isfunction 
-      for i in getmembers(msgs, isfunction):
+      for i in getmembers(msgs, isfunction):  #type
         if i[0].startswith('hm'):
           msgHandlers[i[0]]=i[1]
 
@@ -103,6 +103,43 @@ class Game:
     return retVal
 
 
+  def plotStr(self, e : int, s : int):
+    k = 'P'
+    if e > 0:
+      k += 'E'
+    elif e < 0:
+      k += 'W'
+    else:
+      k += 'R'
+    k += str(abs(e))
+    if s >= 0:
+      k += 'S'
+    else:
+      k += 'N'
+    k += str(abs(s))
+    return k
+
+
+  def plotKey(self, plotStr : str):
+    e = int(plotStr[2])
+    if plotStr[1] == 'W':
+      e = -e
+    s = int(plotStr[4])
+    if plotStr[1] == 'N':
+      s = -s
+    return (e,s)
+
+
+  def plotStates(self):
+    retVal = {}
+    for pk, pv in self.plots.items():
+      retVal[self.plotStr(pk[0], pk[1])] = {
+        'ownerChar': pv.owner.character if pv.owner is not NOPLAYER else 0,
+        'res': pv.resource.value
+      }
+    return retVal
+
+  
   # not written for thread safety (incomingMsgs not locked) -- assumes only asyncio is being used with this method, eg method is atomic
   def processIncomingMsg(self, itm : Tuple[Player, str, Future]):
     if itm is not self.incomingMsgs[0]:
@@ -133,6 +170,13 @@ class Game:
     for r in recips:
       if r.ws is not None:
         self.addBackgroundTask(r.ws.send(msg))
+
+
+  def sendState(self, p:Optional[Player]=None):
+    self.send('GameState', {
+      'state': self.state.name,
+      'awaiting': [p.id for p in self.waitingOn]
+    }, p)
 
 
   def addBackgroundTask(self, coro : Coroutine):
@@ -233,9 +277,7 @@ class Game:
     for k, plot in self.plots.items():
       for mound in plot.moundGeom:
         mounds.append(mound)
-
-    return {"mounds":mounds}
-
+    return mounds
 
 
 UNASSIGNED = Game(-1)

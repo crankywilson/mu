@@ -57,6 +57,7 @@ function sockMessage(event)
 
 
 myID = -1;
+myChar = -1;
 function hmIdentity(m)
 {
   myID = m.id;
@@ -64,6 +65,7 @@ function hmIdentity(m)
 
 leftPositions = [[],[42.5],[30,55],[10,42.5,75],[5,30,55,80]];
 colorsForChar = ['','rgba(255, 0, 0, 0.2)','rgba(255, 255, 0, 0.2)','rgba(0, 255, 0, 0.2)','rgba(0, 0, 255, 0.2)'];
+colorStr = ['','#ff0000','#ffff00','#00ff00','#0000ff'];
 modelNames = ['','red','yellow','green','blue'];
 plbox = null;
 scores = {}
@@ -88,7 +90,7 @@ function hmPlayerState(m)
       plbox[p.id].style.left = leftPositions[numPlayers][num-1]+'%';
 
       totalModels++;
-      fbxLoader.load('models/' + modelNames[p.character] + '.fbx', fbxloaded, n, n); 
+      fbxLoader.load('models/' + modelNames[p.character] + '.fbx', fbxloaded, prog, n); 
     }
     totalCalculated = true;
   }
@@ -108,6 +110,11 @@ function hmPlayerState(m)
       spans[2].innerText = '';
     pb.style.backgroundColor = colorsForChar[p.character];
     scores[p.id] = p.score;
+
+    if (p.id == myID)
+    {
+      myChar = p.character;
+    }
   }
 }
 
@@ -128,16 +135,37 @@ function hmMounds(m)
 
 prepSound = (new Audio("/sound/prep.wav"));
 notSound = (new Audio("/sound/not.wav"));
-function hmWAITFORLANDGRANT(m)
+
+function hmGameState(m)
 {
-  e("msg").innerText = 'Land grant will begin in about 5 seconds.'
-  prepSound.play();
+  awaiting = m.awaiting;
+  switch (m.state)
+  {
+    case 'WAITFORLANDGRANT':
+      state = st.WAITFORLANDGRANT;
+      e("msg").innerText = 'Land grant will begin in about 5 seconds.'
+      prepSound.play();
+      break;
+    case 'LANDGRANT':
+      state = st.LANDGRANT;
+      e("msg").innerText = 'Land grant:  Click on an available plot to claim.  (Land grant ends in about 30 seconds)'
+      notSound.play();
+      break;
+  }
 }
 
 
-function hmSTARTLANDGRANT(m)
+function hmPlots(m)
 {
-  e("msg").innerText = 'Land grant:  Click on an available plot to claim.  (Land grant ends in about 30 seconds)'
-  state = st.LANDGRANT;
-  notSound.play();
+  plots = m.plots;
+  // ok here we need to check the diff between what we had and incoming
+  // put 3d objs as needed...
 }
+
+
+function hmPlotGranted(m)
+{
+  plotOverlay.material.color.set('#ffffff');
+  scene.remove(plotOverlay);
+}
+

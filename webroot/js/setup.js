@@ -56,11 +56,11 @@ function setup()
     // ground
     const textureLoader = new THREE.TextureLoader();
     totalModels++;
-	textureLoader.load( 'img/sand.jpg', sandLoaded); 
+	textureLoader.load( 'img/sand.jpg', sandLoaded, prog); 
     totalModels++;
-    textureLoader.load( 'img/rb.jpg', riverbedloaded);
+    textureLoader.load( 'img/rb.jpg', riverbedloaded, prog);
     totalModels++;
-    textureLoader.load( 'img/mountains.jpg', mountainsLoaded);
+    textureLoader.load( 'img/mountains.jpg', mountainsLoaded, prog);
     
 
 	// buildings
@@ -128,15 +128,15 @@ function setup()
 
     const gltfl = new GLTFLoader();
     totalModels++;
-	gltfl.load('models/atat/scene.gltf', muleloaded, n, n);
+	gltfl.load('models/atat/scene.gltf', muleloaded, prog, n);
     totalModels++;
-	gltfl.load('models/plants/plants.gltf', foodloaded, n, n);
+	gltfl.load('models/plants/plants.gltf', foodloaded, prog, n);
     totalModels++;
-	gltfl.load('models/energy/energy.gltf', energyloaded, n, n);
+	gltfl.load('models/energy/energy.gltf', energyloaded, prog, n);
     totalModels++;
-	gltfl.load('models/excv/excv.gltf', smithoreloaded, n, n);
+	gltfl.load('models/excv/excv.gltf', smithoreloaded, prog, n);
     totalModels++;
-    gltfl.load('models/drill/drill.gltf', crystiteloaded, n, n);
+    gltfl.load('models/drill/drill.gltf', crystiteloaded, prog, n);
     totalModels++;
 	gltfl.load('models/blueflag/scene.gltf', flagloaded, n, n);
 
@@ -345,3 +345,11 @@ function sandLoaded(sandtexture)
     loadProgress();
 }
 
+function prog(p)
+{
+    let m = e('msg').innerText;
+    if (m.indexOf('[') > 0) 
+        m = m.substring(0, m.indexOf('[') - 1);
+    m += ' [' + p.loaded + ']';
+    e('msg').innerText = m;
+}
