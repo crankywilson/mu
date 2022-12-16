@@ -6,7 +6,10 @@ let totalCalculated = false;
 let modelsLoaded = 0;
 let mulemod = null;
 let flagb = null;
-let redft = null;
+let flagAnim = null;
+let flagPoleMat = null;
+let flagTexture = [null,null,null,null,null];
+let plotboundMat = [null,null,null,null,null];
 let foodmdl = null;
 let energymdl = null;
 let smithoremdl = null;
@@ -62,6 +65,12 @@ function setup()
     totalModels++;
     textureLoader.load( 'img/mountains.jpg', mountainsLoaded, prog);
     
+
+    flagPoleMat = new THREE.MeshLambertMaterial( {color: buildingColor, reflectivity: 15} );
+    plotboundMat[1] = new THREE.MeshLambertMaterial( {color: '#ff0000', reflectivity: 15} );
+    plotboundMat[2] = new THREE.MeshLambertMaterial( {color: '#ffff00', reflectivity: 15} );
+    plotboundMat[3] = new THREE.MeshLambertMaterial( {color: '#006600', reflectivity: 15} );
+    plotboundMat[4] = new THREE.MeshLambertMaterial( {color: '#3366ff', reflectivity: 15} );
 
 	// buildings
     buildingsGroup = new THREE.Group()
@@ -142,7 +151,13 @@ function setup()
 
     const tl = new THREE.TextureLoader();
     totalModels++;
-    tl.load('img/redf.png', function(t) { redft = t; loadProgress(); });
+    tl.load('img/redf.png', function(t) { flagTexture[1] = t; loadProgress(); });
+    totalModels++;
+    tl.load('img/yellowf.png', function(t) { flagTexture[2] = t; loadProgress(); });
+    totalModels++;
+    tl.load('img/greenf.png', function(t) { flagTexture[3] = t; loadProgress(); });
+    totalModels++;
+    tl.load('img/bluef.png', function(t) { flagTexture[4] = t; loadProgress(); });
 
 	window.addEventListener( 'resize', onWindowResize );
 	onWindowResize();
@@ -246,6 +261,7 @@ function crystiteloaded(mdl)
 function flagloaded(fl)
 {
     flagb = fl.scene;
+    flagAnim = fl.animations[ 0 ];
     flagb.scale.set(.2,.2,.2);
     flagb.position.set(1.1,.4,-.8);
     let mixer = new THREE.AnimationMixer(fl.scene);

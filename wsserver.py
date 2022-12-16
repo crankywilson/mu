@@ -33,6 +33,7 @@ async def newConnection(ws:websockets.server.WebSocketServerProtocol, path:str):
  
 
 async def messageReceived(ws:websockets.server.WebSocketServerProtocol, msg:str, p:Player, g:Game):
+  print(f'RECV {p.id} {msg}')
   await processMsg(ws, msg, p, g)
 
 

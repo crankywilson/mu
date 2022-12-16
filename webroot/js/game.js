@@ -119,15 +119,27 @@ function plotOverlayIsWhite()
 
 function validForLandGrant(x, y)
 {
-  if (!awaiting.includes(myId))
+  if (!awaiting.includes(myID))
     return false;
   return plotAvail(x, y);
 }
 
-
+_lastX = 0;
+_lastY = 0;
 function mouseMove(mouseEvent) {
-  let x = mouseEvent.pageX;// - view.getBoundingClientRect().x, 
-  let y = mouseEvent.pageY;
+  let x = 0;
+  let y = 0;
+
+  if (mouseEvent == null) {
+    x = _lastX;
+    y = _lastY;
+  }
+  else {
+    x = mouseEvent.pageX;// - view.getBoundingClientRect().x, 
+    y = mouseEvent.pageY;
+    _lastX = x;
+    _lastY = y;
+  }
 
   x *= window.devicePixelRatio;
   y *= window.devicePixelRatio;
@@ -172,7 +184,7 @@ function mouseClick(mouseEvent) {
     let plot = getPlotForMouse(x, y);
     if (plotAvail(plot.x, plot.y)) {
       plotOverlay.material.color.set(colorStr[myChar]);
-      socket.send(JSON.stringify({ msg: "PlotRequest", x: plot.x, y: plot.y }));
+      socket.send(JSON.stringify({ msg: "PlotRequest", x: plot.x, y: -plot.y }));
     }
   }
 }
@@ -241,15 +253,15 @@ function handleCamMove(delta) {
 }
 
 
-function strToPlot(str)
+function strToPlot(plotStr)
 {
   let e = Number(plotStr[2])
   if (plotStr[1] == 'W')
     e = -e;
   let s = Number(plotStr[4])
-  if (plotStr[1] == 'N')
+  if (plotStr[3] == 'N')
     s = -s;
-  return THREE.Vector2(e,s)
+  return [e,s];
 }
 
 
@@ -274,5 +286,10 @@ function plotToStr(e, s)
 
 function plotAvail(e, s)
 {
-  return plots[plotToStr(e,s)].ownerChar == 0;
+  let k = plotToStr(e,s);
+  if (!(k in plots))
+    return false;
+  if (e == 0 && s == 0)
+    return false;
+  return plots[k].ownerChar == 0;
 }

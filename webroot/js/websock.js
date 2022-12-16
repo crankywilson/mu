@@ -36,7 +36,7 @@ function websocketOpened(event)
 pendingMessages = []  // queue up newer messages
 function sockMessage(event)
 {
-  console.log('Got: ' + event.data)
+  console.log('Got: ' + event.data.substring(0,20))
 
   // don't process new message until all older ones have had processing completed
   pendingMessages.push(event.data);
@@ -149,7 +149,9 @@ function hmGameState(m)
     case 'LANDGRANT':
       state = st.LANDGRANT;
       e("msg").innerText = 'Land grant:  Click on an available plot to claim.  (Land grant ends in about 30 seconds)'
+      if (awaiting.indexOf(myID) == -1) hmPlotGranted(null);
       notSound.play();
+      mouseMove(null);
       break;
   }
 }
@@ -157,9 +159,92 @@ function hmGameState(m)
 
 function hmPlots(m)
 {
-  plots = m.plots;
+  for (k in m.plots)
+  {
+    if (!(k in plots))
+    {
+      let newPlot = {
+        ownerChar: 0,
+        res: -1,
+        flag: null,
+        pole: null,
+        lines: [],
+        rsrc3d: null
+      };
+      plots[k] = newPlot;
+    }
+
+    if (plots[k].ownerChar != m.plots[k].ownerChar)
+    {
+      if (plots[k].ownerChar > 0)
+      {
+        // remove flag, lines
+      }
+      plots[k].ownerChar = m.plots[k].ownerChar;
+      if (plots[k].ownerChar > 0)
+      {
+        let f = flagb.clone();
+        let mixer = new THREE.AnimationMixer(f);
+        let action = mixer.clipAction(flagAnim);
+        action.play();
+        scene.add(f);
+        flags.push({scene:f, mixer:mixer})
+
+        function updateTexture(child)
+        {
+          if (child instanceof THREE.Mesh) {
+            child.material.map = flagTexture[plots[k].ownerChar];
+          }
+        }
+        f.traverse(updateTexture);
+        let es = strToPlot(k);
+        f.position.set(es[0] * 4 - 1, 1.5, es[1] * 4);
+        let poleGeom = new THREE.CylinderGeometry(.04, .05, 1.8);
+        plots[k].pole = new THREE.Mesh( poleGeom, flagPoleMat );
+        plots[k].pole.position.set(es[0] * 4 - 1.35, .9, es[1] * 4);
+        scene.add(plots[k].pole);
+        plots[k].flag = f;
+
+        let ltg = new THREE.BoxGeometry(4, .01, .1);
+        let ltm = new THREE.Mesh( ltg, plotboundMat[plots[k].ownerChar] );
+        ltm.position.set(es[0]*4, 0, es[1]*4 - 1.95);
+        scene.add(ltm);
+        plots[k].lines.push(ltm);
+        let lbm = ltm.clone();
+        lbm.position.set(es[0]*4, 0, es[1]*4 + 1.95);
+        scene.add(lbm);
+        plots[k].lines.push(lbm);
+        let llg = new  THREE.BoxGeometry(.1, .01, 4);
+        let llm = new THREE.Mesh( llg, plotboundMat[plots[k].ownerChar] );
+        llm.position.set(es[0]*4 - 1.95, 0, es[1]*4);
+        scene.add(llm);
+        plots[k].lines.push(llm);
+        let lrm = llm.clone();
+        lrm.position.set(es[0]*4 + 1.95, 0, es[1]*4);
+        scene.add(lrm);
+        plots[k].lines.push(lrm);
+      }
+    }
+
+    if (plots[k].res != m.plots[k].res)
+    {
+      if (plots[k].res > -1)
+      {
+        // remove rsrc3d
+      }
+      plots[k].res = m.plots[k].res;
+      if (plots[k].res > 0)
+      {
+        // add rsrc3d
+      }
+    }
+  }
   // ok here we need to check the diff between what we had and incoming
   // put 3d objs as needed...
+/*
+
+
+  */
 }
 
 
@@ -167,5 +252,9 @@ function hmPlotGranted(m)
 {
   plotOverlay.material.color.set('#ffffff');
   scene.remove(plotOverlay);
+  let ind = awaiting.indexOf(myID);
+  if (ind > -1)
+    awaiting.splice(ind, 1);
+  e("msg").innerText = 'Plot Granted.  (Waiting for other players)';
 }
 
