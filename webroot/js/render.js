@@ -54,10 +54,13 @@ function moveChars(delta)
       }
       else
       {
+        /*
         let newTime = pl[i].mixer.time + (delta * pl[i].speed);
         if (newTime > 20.5)
           newTime -= 16.5;
         pl[i].mixer.setTime(newTime);
+        */
+        pl[i].mixer.update(delta * pl[i].speed);
       }
     }
     if (i == myChar)
