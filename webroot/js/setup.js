@@ -68,7 +68,7 @@ function setup()
 
     flagPoleMat = new THREE.MeshLambertMaterial( {color: buildingColor, reflectivity: 15} );
     plotboundMat[1] = new THREE.MeshLambertMaterial( {color: '#ff0000', reflectivity: 15} );
-    plotboundMat[2] = new THREE.MeshLambertMaterial( {color: '#ffff00', reflectivity: 15} );
+    plotboundMat[2] = new THREE.MeshLambertMaterial( {color: '#ff8a45', reflectivity: 15} );
     plotboundMat[3] = new THREE.MeshLambertMaterial( {color: '#006600', reflectivity: 15} );
     plotboundMat[4] = new THREE.MeshLambertMaterial( {color: '#3366ff', reflectivity: 15} );
 
@@ -161,6 +161,8 @@ function setup()
 
 	window.addEventListener( 'resize', onWindowResize );
 	onWindowResize();
+
+    window.addEventListener('contextmenu', (e) => {e.preventDefault();}, false);
 }
 
 function n(ignore)
@@ -184,17 +186,17 @@ function loadProgress()
         setupComplete();
 }
 
-function fbxloaded(dude, n, x, z)
+function fbxloaded(dude, n)
 {
     dude.scale.set(.004,.0025,.004);
-    dude.position.x = x;
-    dude.position.z = z;
+    dude.position.x = 0;
+    dude.position.z = 0;
 
-    plmod[n] = dude;
-    dudemixer[n] = new THREE.AnimationMixer(dude);
-    let action = dudemixer[n].clipAction( dude.animations[0] );
+    pl[n].model = dude;
+    pl[n].mixer = new THREE.AnimationMixer(dude);
+    let action = pl[n].mixer.clipAction( dude.animations[0] );
     action.play();
-    dudemixer[n].setTime(.55);
+    pl[n].mixer.setTime(.55);
     scene.add(dude);
 
     loadProgress();
@@ -317,7 +319,7 @@ function riverbedloaded(rbtext)
 		textureHeight: 1024
 	} );
 
-	water.position.y = -.1;
+	water.position.y = -.01;
 	water.rotation.x = Math.PI * - 0.5;
 	scene.add( water );
 

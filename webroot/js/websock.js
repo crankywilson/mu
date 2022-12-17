@@ -90,7 +90,13 @@ function hmPlayerState(m)
       plbox[p.id].style.left = leftPositions[numPlayers][num-1]+'%';
 
       totalModels++;
-      fbxLoader.load('models/' + modelNames[p.character] + '.fbx', fbxloaded, prog, n); 
+      let fbxloadedfn = [null,
+        (fbx) => { fbxloaded(fbx, 1); },
+        (fbx) => { fbxloaded(fbx, 2); },
+        (fbx) => { fbxloaded(fbx, 3); },
+        (fbx) => { fbxloaded(fbx, 4); },
+      ];
+      fbxLoader.load('models/' + modelNames[p.character] + '.fbx', fbxloadedfn[p.character], prog, n); 
     }
     totalCalculated = true;
   }
@@ -149,9 +155,13 @@ function hmGameState(m)
     case 'LANDGRANT':
       state = st.LANDGRANT;
       e("msg").innerText = 'Land grant:  Click on an available plot to claim.  (Land grant ends in about 30 seconds)'
-      if (awaiting.indexOf(myID) == -1) hmPlotGranted(null);
+      if (awaiting.indexOf(myID) == -1) e("msg").innerText = '(waiting on other players)';
       notSound.play();
       mouseMove(null);
+      break;
+    case 'IMPROV':
+      
+      state = st.TRANSITION_TO_SETTLEMENT;
       break;
   }
 }

@@ -15,6 +15,14 @@ class Player:
     self.production = [0,0,0,0]
     self.switchedGames = False   # set this to update websocket processing
 
+    self.pos = [0.0, 0.0]
+    self.dest = [0.0, 0.0]
+    self.speed = 0
+    self.muleFollowing = False
+    self.mulepos = [0.0, 0.0]
+    self.muledest = [0.0, 0.0]
+    self.muletype = -1
+
     #auction state vals
     self.criticalLevel = 0
     self.buying = True
@@ -25,6 +33,18 @@ class Player:
     self.immediateBidUntil : Optional[float] = None
     self.immediateBidRange : Optional[range] = None
     self.activelyTrading = False
+
+  def posData(self):
+    return {
+      'pos': self.pos,
+      'dest': self.dest,
+      'speed': self.speed,
+      'muleFollowing': self.muleFollowing,
+      'mulepos': self.mulepos,
+      'muledest': self.muledest,
+      'muletype': self.muletype 
+    }
+
 
 NOPLAYER = Player()
 

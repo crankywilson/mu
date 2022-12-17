@@ -78,4 +78,9 @@ def hmPlotRequest(g:Game, p:Player, msg:dict):
     g.send('Plots', {'plots':  g.plotStates()})
     g.send('PlotGranted', {}, p)
     g.waitingOn.remove(p)
-
+    if len(g.waitingOn) == 0:
+      g.waitingOn.extend(g.players)
+      g.state = GameState.IMPROV
+      for p in g.players:
+        g.send('PosData', p.posData())
+      g.sendState()

@@ -61,7 +61,7 @@ class _handler(http.server.SimpleHTTPRequestHandler):
 
   def send_my_headers(self):
     if self.path.startswith("/js/") or self.path == '/play':
-      self.send_header("Expires", "0")
+      self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
 
   def log_message(self, format, *args):
         return
