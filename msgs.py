@@ -72,7 +72,7 @@ def hmStart(g:Game, p:Player, msg:dict):
 
 
 def hmPlotRequest(g:Game, p:Player, msg:dict):
-  if g.state = GameState.LANDGRANT and p in g.waitingOn:
+  if g.state == GameState.LANDGRANT and p in g.waitingOn:
     g.plots[(msg['x'], msg['y'])].owner = p
     g.send('Plots', {'plots':  g.plotStates()})
     g.send('PlotGranted', {}, p)
