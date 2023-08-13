@@ -55,6 +55,14 @@ class _handler(http.server.SimpleHTTPRequestHandler):
     else:
       http.server.SimpleHTTPRequestHandler.do_GET(self)
 
+  def end_headers(self):
+    self.send_my_headers()
+    http.server.SimpleHTTPRequestHandler.end_headers(self)
+
+  def send_my_headers(self):
+    if self.path.startswith("/js/") or self.path == '/play':
+      self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+
   def log_message(self, format, *args):
         return
 

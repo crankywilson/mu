@@ -20,20 +20,21 @@ def hmReady(g:Game, p:Player, msg:dict):
   g.send('Identity', {"id":p.id, "token":app.getToken(g,p)}, p)
   g.send('PlayerState', g.playerState())  # this gets sent to everyone to update connect status
   if g.started:
-    g.send('Mounds',    {'mounds': g.mounds()    }, p)
-    g.send('Plots',     {'plots':  g.plotStates()}, p)
+    g.send('Mounds', {'mounds': g.mounds()}, p)
 
 
 # This message handler advances the game state once the client indicates
 # that the initial mandatory stuff has been processed;  really only used
 # for starting the game
 def hmSetupComplete(g:Game, p:Player, msg:dict):
+  g.send('Plots', {'plots':  g.plotStates()}, p)  # can't send this until textures loaded...
+
   if g.state == GameState.WAITINGFORALLJOIN and p in g.waitingOn:
     g.waitingOn.remove(p)
   if g.state == GameState.WAITINGFORALLJOIN and len(g.waitingOn) == 0:
     g.state = GameState.WAITFORLANDGRANT
     g.sendState()
-    g.addTimerTask(5, startLandGrant, g)
+    g.addTimerTask(.05, startLandGrant, g)
   else:
     g.sendState(p)
 
@@ -77,4 +78,9 @@ def hmPlotRequest(g:Game, p:Player, msg:dict):
     g.send('Plots', {'plots':  g.plotStates()})
     g.send('PlotGranted', {}, p)
     g.waitingOn.remove(p)
-
+    if len(g.waitingOn) == 0:
+      g.waitingOn.extend(g.players)
+      g.state = GameState.IMPROV
+      for p in g.players:
+        g.send('PosData', p.posData())
+      g.sendState()

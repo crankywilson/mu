@@ -167,6 +167,7 @@ class Game:
     if vals is not None:
       d.update(vals)
     msg = json.dumps(d)
+    print(f'SEND {p.id if p is not None else "A"} {msg[0:69]}')
     for r in recips:
       if r.ws is not None:
         self.addBackgroundTask(r.ws.send(msg))
